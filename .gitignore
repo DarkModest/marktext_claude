@@ -1,0 +1,5 @@
+node_modules/
+mt-extracted/
+newbuild/
+scratch/
+temp-syntax-check.mjs
