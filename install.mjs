@@ -26,8 +26,8 @@ if (process.env.ALLOW_RUNNING !== '1') {
       console.error('MarkText is running. Close it first (save your documents).');
       process.exit(1);
     }
-  } catch (e) {
-    if (e.status !== undefined && !e.stderr) { /* tasklist missing on non-windows: ignore */ }
+  } catch {
+    // non-Windows: tasklist unavailable, skip the running-app check
   }
 }
 

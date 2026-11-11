@@ -54,7 +54,11 @@ const o = new Set(origList), n = new Set(newList);
 const missing = origList.filter((x) => !n.has(x));
 const added = newList.filter((x) => !o.has(x));
 console.log('file-list diff vs baseline: missing=', missing.length, 'added=', added.length);
-if (missing.length) { console.log('MISSING:', missing.slice(0, 10)); process.exit(1); }
+if (missing.length || added.length) {
+  if (missing.length) console.log('MISSING:', missing.slice(0, 10));
+  if (added.length) console.log('ADDED:', added.slice(0, 10));
+  process.exit(1);
+}
 
 // 4. all patches present in the packed file
 const bs = (p) => p.replace(/\//g, '\\');
@@ -73,7 +77,7 @@ const checks = [
   ['ren switch claude-dark', renPacked.includes('case "claude-dark": themeStyleEle.innerHTML = patchTheme(claudeDark());')],
   ['ren prefs list', renPacked.includes('{ name: "claude" },') && renPacked.includes('{ name: "claude-dark" },')],
   // content checks: catch a structurally valid but STALE (old-palette) theme
-  ['theme rev is current (2)', renPacked.includes('var claudeThemeRev = 2;')],
+  ['theme rev is current (>=2)', Number((renPacked.match(/var claudeThemeRev = (\d+);/) || [1])[1]) >= 2],
   ['light body text is solid ink', renPacked.includes('--editorColor: rgba(20, 20, 19, 1)')],
   ['dark strong is salmon', renPacked.includes('--strongColor: #e6987d')],
   ['light prism palette applied', renPacked.includes('color: #8100c2')],
