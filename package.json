@@ -1,6 +1,6 @@
 {
   "name": "marktext-claude-theme",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Patch MarkText 0.23.x with Claude (light/dark) editor themes. Palette from blaxisomu/typora_claude.",
   "type": "module",

@@ -21,7 +21,21 @@ if (!REN) {
 }
 console.log('renderer bundle:', REN);
 
-const THEME_REV = 2;
+// ---------- bundle Claude web fonts into the asar (renderer CSP allows font-src 'self') ----------
+const FONT_FILES = ['AnthropicSerif-WebText.ttf', 'AnthropicSans-WebText.ttf', 'AnthropicMono-Variable.ttf'];
+{
+  const srcDir = 'fonts';
+  const destDir = 'mt-extracted/out/renderer/assets/claude-fonts';
+  if (FONT_FILES.every((f) => fs.existsSync(path.join(srcDir, f)))) {
+    fs.mkdirSync(destDir, { recursive: true });
+    for (const f of FONT_FILES) fs.copyFileSync(path.join(srcDir, f), path.join(destDir, f));
+    console.log('fonts bundled:', FONT_FILES.length, '->', destDir);
+  } else {
+    console.warn('WARNING: fonts/ is incomplete — theme will fall back to system fonts.');
+  }
+}
+
+const THEME_REV = 3;
 let ren = fs.readFileSync(REN, 'utf8');
 if (ren.includes('claude_theme_default$1')) {
   const m = ren.match(/var claudeThemeRev = (\d+);/);
@@ -169,6 +183,55 @@ function varsBlock(v) {
   --em-color: var(--emColor);
   --list-marker-color: var(--listMarkerColor);
   --hr-color: var(--hrColor);
+}
+
+/* ---- Claude typography: bundled web fonts + CJK/system fallbacks ---- */
+@font-face {
+  font-family: "Anthropic Serif Web Text";
+  src: url("./assets/claude-fonts/AnthropicSerif-WebText.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Anthropic Sans Web Text";
+  src: url("./assets/claude-fonts/AnthropicSans-WebText.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Anthropic Mono Variable";
+  src: url("./assets/claude-fonts/AnthropicMono-Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* body text: serif (claude.ai content font); CJK -> Noto Serif SC / Songti / SimSun */
+.mu-editor,
+.mu-container {
+  font-family: "Anthropic Serif Web Text", "Tiempos Text", "Source Serif 4", Georgia, "Times New Roman",
+    "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif !important;
+}
+/* code: Anthropic Mono; CJK -> Source Han Sans / Noto Sans SC */
+.mu-code-block,
+pre.mu-code-block,
+code.mu-code,
+code.mu-inline-rule {
+  font-family: "Anthropic Mono Variable", "Anthropic Mono", "SF Mono", "Cascadia Code", "JetBrains Mono",
+    Consolas, "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", ui-monospace, monospace !important;
+}
+/* source mode (CodeMirror): #ag-common-style is injected after the theme, so !important is required */
+.CodeMirror {
+  font-family: "Anthropic Mono Variable", "Anthropic Mono", "SF Mono", "Cascadia Code", "JetBrains Mono",
+    Consolas, "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", ui-monospace, monospace !important;
+}
+/* UI chrome: Anthropic Sans; CJK -> Noto Sans SC / PingFang / YaHei */
+html,
+body {
+  font-family: "Anthropic Sans Web Text", "Styrene B", "Segoe UI", system-ui, -apple-system,
+    "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif !important;
 }
 
 .editor-tabs {

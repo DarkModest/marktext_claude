@@ -25,12 +25,13 @@
 
 4. 依次执行并检查输出：
    - `node extract.mjs`（解包 app.asar → mt-extracted/）
-   - `node build-claude-themes.mjs`（注入两个主题；幂等，重跑会显示 already patched）
-   - `node repack-verify.mjs`（必须看到 18 项 PASS 和 ALL VERIFICATION PASSED）
+   - `node build-claude-themes.mjs`（注入两个主题并打包三款 Anthropic 字体；幂等，重跑会显示 already patched）
+   - `node repack-verify.mjs`（必须看到 20 项 PASS 和 ALL VERIFICATION PASSED）
    - `node install.mjs`（首次自动备份为 app.asar.bak-claude；要求 MarkText 已关闭）
 
 5. 验证：让我启动 MarkText，检查 主题 菜单里有 "Claude / Claude 浅色" 和
-   "Claude Dark / Claude 深色"，选择后编辑器底色变为米白或暖炭。
+   "Claude Dark / Claude 深色"，选择后编辑器底色变为米白或暖炭；
+   同时确认字体：正文衬线、代码等宽、侧栏无衬线，中文正常显示。
    把回滚方法告诉我：把 `app.asar.bak-claude` 复制回 `app.asar` 即可。
 
 注意事项（重要，都是实测踩过的坑）：

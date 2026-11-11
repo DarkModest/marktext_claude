@@ -47,16 +47,18 @@ fs.mkdirSync('newbuild', { recursive: true });
 await asar.createPackageWithOptions('mt-extracted', OUT, { unpack: '*.{node,exe}' });
 console.log('packed:', OUT, fs.statSync(OUT).size, 'bytes');
 
-// 3. file list identical to baseline
+// 3. file list: nothing may disappear; the only allowed additions are the bundled fonts
+const FONT_DIR = /\\out\\renderer\\assets\\claude-fonts(\\|$)/;
 const origList = asar.listPackage(ORIG).sort();
 const newList = asar.listPackage(OUT).sort();
 const o = new Set(origList), n = new Set(newList);
 const missing = origList.filter((x) => !n.has(x));
 const added = newList.filter((x) => !o.has(x));
-console.log('file-list diff vs baseline: missing=', missing.length, 'added=', added.length);
-if (missing.length || added.length) {
+const unexpected = added.filter((x) => !FONT_DIR.test(x));
+console.log('file-list diff vs baseline: missing=', missing.length, 'added=', added.length, '(allowed: bundled fonts)');
+if (missing.length || unexpected.length) {
   if (missing.length) console.log('MISSING:', missing.slice(0, 10));
-  if (added.length) console.log('ADDED:', added.slice(0, 10));
+  if (unexpected.length) console.log('UNEXPECTED ADDED:', unexpected.slice(0, 10));
   process.exit(1);
 }
 
@@ -77,7 +79,9 @@ const checks = [
   ['ren switch claude-dark', renPacked.includes('case "claude-dark": themeStyleEle.innerHTML = patchTheme(claudeDark());')],
   ['ren prefs list', renPacked.includes('{ name: "claude" },') && renPacked.includes('{ name: "claude-dark" },')],
   // content checks: catch a structurally valid but STALE (old-palette) theme
-  ['theme rev is current (>=2)', Number((renPacked.match(/var claudeThemeRev = (\d+);/) || [1])[1]) >= 2],
+  ['theme rev is current (>=3)', Number((renPacked.match(/var claudeThemeRev = (\d+);/) || [1])[1]) >= 3],
+  ['fonts bundled (3 ttf)', ['AnthropicSerif-WebText.ttf', 'AnthropicSans-WebText.ttf', 'AnthropicMono-Variable.ttf'].every((f) => fs.existsSync('mt-extracted/out/renderer/assets/claude-fonts/' + f))],
+  ['typography rules applied', ['@font-face', 'Anthropic Serif Web Text', 'Tiempos Text', 'Anthropic Mono Variable', 'Anthropic Sans Web Text', 'Styrene B', 'Noto Serif SC', 'Noto Sans SC'].every((s) => renPacked.includes(s))],
   ['light body text is solid ink', renPacked.includes('--editorColor: rgba(20, 20, 19, 1)')],
   ['dark strong is salmon', renPacked.includes('--strongColor: #e6987d')],
   ['light prism palette applied', renPacked.includes('color: #8100c2')],
