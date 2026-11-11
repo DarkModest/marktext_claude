@@ -21,10 +21,20 @@ if (!REN) {
 }
 console.log('renderer bundle:', REN);
 
+const THEME_REV = 2;
 let ren = fs.readFileSync(REN, 'utf8');
 if (ren.includes('claude_theme_default$1')) {
-  console.log('already patched, nothing to do.');
-  process.exit(0);
+  const m = ren.match(/var claudeThemeRev = (\d+);/);
+  const rev = m ? Number(m[1]) : 1;
+  if (rev >= THEME_REV) {
+    console.log(`already patched (rev ${rev}), nothing to do.`);
+    process.exit(0);
+  }
+  console.error(`input tree contains an OLD claude patch (rev ${rev}) — refusing to repack a stale theme.`);
+  console.error('Re-extract from the STOCK asar first: node extract.mjs');
+  console.error('(extract.mjs automatically uses app.asar.bak-claude when the target asar is patched).');
+  console.error('If no backup exists, reinstall MarkText to restore a stock asar, then re-run.');
+  process.exit(1);
 }
 
 // ---------- theme CSS builders ----------
@@ -572,6 +582,7 @@ const patches = [];
 {
   const defs =
     '//#region claude themes (custom patch)\n' +
+    'var claudeThemeRev = ' + THEME_REV + ';\n' +
     'var claude_theme_default$1 = ' + JSON.stringify(lightVars) + ';\n' +
     'var claude_theme_default = ' + JSON.stringify(lightPrism) + ';\n' +
     'var claude_dark_theme_default$1 = ' + JSON.stringify(darkVars) + ';\n' +

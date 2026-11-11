@@ -72,6 +72,12 @@ const checks = [
   ['ren switch claude', renPacked.includes('case "claude": themeStyleEle.innerHTML = patchTheme(claude());')],
   ['ren switch claude-dark', renPacked.includes('case "claude-dark": themeStyleEle.innerHTML = patchTheme(claudeDark());')],
   ['ren prefs list', renPacked.includes('{ name: "claude" },') && renPacked.includes('{ name: "claude-dark" },')],
+  // content checks: catch a structurally valid but STALE (old-palette) theme
+  ['theme rev is current (2)', renPacked.includes('var claudeThemeRev = 2;')],
+  ['light body text is solid ink', renPacked.includes('--editorColor: rgba(20, 20, 19, 1)')],
+  ['dark strong is salmon', renPacked.includes('--strongColor: #e6987d')],
+  ['light prism palette applied', renPacked.includes('color: #8100c2')],
+  ['light inline code rule', renPacked.includes('> code.mu-code {')],
   ['i18n en', asar.extractFile(OUT, bs('static/locales/en.json')).toString('utf8').includes('"claudeLight": "Claude"')],
   ['i18n zh-CN', asar.extractFile(OUT, bs('static/locales/zh-CN.json')).toString('utf8').includes('Claude 浅色')],
 ];

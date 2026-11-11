@@ -26,7 +26,7 @@
 4. 依次执行并检查输出：
    - `node extract.mjs`（解包 app.asar → mt-extracted/）
    - `node build-claude-themes.mjs`（注入两个主题；幂等，重跑会显示 already patched）
-   - `node repack-verify.mjs`（必须看到 13 项 PASS 和 ALL VERIFICATION PASSED）
+   - `node repack-verify.mjs`（必须看到 18 项 PASS 和 ALL VERIFICATION PASSED）
    - `node install.mjs`（首次自动备份为 app.asar.bak-claude；要求 MarkText 已关闭）
 
 5. 验证：让我启动 MarkText，检查 主题 菜单里有 "Claude / Claude 浅色" 和
@@ -45,6 +45,9 @@
 - 重打包的 unpack 规则必须用 basename 通配 `*.{node,exe}`（asar 在 Windows
   上拿绝对反斜杠路径做 matchBase 匹配，斜杠式 glob 一条都匹配不上），
   否则 ced/keytar/native-keymap 的 .node 和 rg.exe 会被打进包里导致启动崩溃。
+- 如果目标电脑装过本主题的旧版本：也重新跑完整四步，不要手工跳过任何一步。
+  新版 extract.mjs 会自动改用 app.asar.bak-claude 原始备份；build 脚本遇到旧补丁树会
+  报错拒绝；repack-verify 会校验主题版本（rev 2），旧版本无法通过。
 - 如果某步失败，先读脚本输出再动手；不要跳过 repack-verify 直接安装。
 
 ---

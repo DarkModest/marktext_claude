@@ -25,6 +25,11 @@ node install.mjs             # 备份原包并安装
 
 非默认安装位置：给脚本传 `app.asar` 路径参数，或设置 `MARKTEXT_ASAR` 环境变量。
 
+已装过本主题旧版本？直接重跑上面四步即可：`extract.mjs` 会检测到目标包已打补丁，
+自动改用首次安装时生成的 `app.asar.bak-claude` 原始备份重新开始；构建脚本会拒绝在
+旧补丁树上继续，打包校验会检查主题版本（rev 2），旧版无法通过。若原始备份不存在，
+请先重装 MarkText 再跑。
+
 安装完成后启动 MarkText，在 **主题** 菜单中选择 **Claude**（浅色）或 **Claude Dark**（深色）；
 或使用 偏好设置 → 主题。
 
@@ -54,7 +59,7 @@ Copy-Item "$env:LOCALAPPDATA\Programs\marktext\resources\app.asar.bak-claude" `
    若主进程仍在（可能有未保存文档弹窗），停下来让我保存文档后关闭——绝不 /F 强杀。
 3. cd marktext_claude && npm install
 4. 依次执行 node extract.mjs、node build-claude-themes.mjs、node repack-verify.mjs
-   （必须看到 ALL VERIFICATION PASSED）、node install.mjs。
+   （必须看到 18 项 PASS 和 ALL VERIFICATION PASSED）、node install.mjs。
 5. 让我启动 MarkText，确认主题菜单里有 "Claude 浅色 / Claude 深色"，选择后底色变米白/暖炭；
    并告诉我回滚方法（app.asar.bak-claude 复制回去）。
 
